@@ -5,7 +5,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("./model/user");
+const Book = require("./model/book");
 const auth = require("./middleware/auth");
+const book = require("./model/book");
 
 const app = express();
 
@@ -21,7 +23,7 @@ app.post("/signup", async (req, res) => {
     if (oldUser) {
       return res.status(409).send("User Already Exist. Please Login");
     }
-    
+
     encryptedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       first_name,
@@ -79,6 +81,50 @@ app.post("/profile", async (req, res) => {
   }
 });
 
+app.post("/addBook", async (req, res) => {
+  try {
+  
+    const { book_name, book_title } = req.body;
+    
+    const book = new Book({
+      book_name: req.body.book_name,
+      book_title: req.body.book_title
+  })
+  
+
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+//GET BOOKS
+app.get("/getBooks", async (req, res) => {
+  try{
+    const book = await Book.find();
+    res.json(book)
+}
+  catch(error){
+      res.status(500).json({message: error.message})
+  }
+});
+
+
+
+//Search Books
+app.get('/getBook/:id', async (req, res) => {
+  try{
+
+    var response = [];
+    response = await Book.find({book_title: req.params.id});
+    res.json(response);
+  }
+  catch(error){
+      res.status(500).json({message: error.message})
+  }
+})
+
+
+
 app.use("*", (req, res) => {
   res.status(404).json({
     success: "false",
@@ -90,4 +136,9 @@ app.use("*", (req, res) => {
   });
 });
 
+
+
+
 module.exports = app;
+
+
